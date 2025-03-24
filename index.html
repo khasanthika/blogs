@@ -9,6 +9,8 @@
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
   />
+  <!-- Showdown CDN for Markdown conversion -->
+  <script src="https://cdn.jsdelivr.net/npm/showdown/dist/showdown.min.js"></script>
   <style>
     /* Global Reset */
     * {
@@ -120,7 +122,7 @@
     }
     /* Article Styling */
     .article {
-      margin-bottom: 10px; /* Reduced space after topic before the line */
+      margin-bottom: 10px;
     }
     .article h3 {
       font-size: 1.1em;
@@ -136,7 +138,7 @@
       border: none;
       border-top: 1px solid #cce0ff;
       width: 40px;
-      margin: 5px 0 20px 0; /* 5px above, 20px below */
+      margin: 5px 0 20px 0;
       text-align: left;
     }
     /* More link styled to be at the bottom right */
@@ -199,10 +201,10 @@
         />
       </div>
       <div class="social-links">
-         <a href="https://github.com/yourusername" target="_blank"><i class="fab fa-github"></i></a>
-      <a href="https://www.linkedin.com/in/yourusername" target="_blank"><i class="fab fa-linkedin"></i></a>
-      <a href="mailto:kalanihasanthika@gmail.com" target="_blank"><i class="fas fa-envelope"></i></a>
-      <a href="https://twitter.com/yourusername" target="_blank"><i class="fab fa-twitter"></i></a>
+        <a href="https://github.com/yourusername" target="_blank"><i class="fab fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/yourusername" target="_blank"><i class="fab fa-linkedin"></i></a>
+        <a href="mailto:kalanihasanthika@gmail.com" target="_blank"><i class="fas fa-envelope"></i></a>
+        <a href="https://twitter.com/yourusername" target="_blank"><i class="fab fa-twitter"></i></a>
         <a href="https://scholar.google.com/citations?user=yourid" target="_blank"><i class="fas fa-graduation-cap"></i></a>
       </div>
     </div>
@@ -230,7 +232,7 @@
   </div>
 
   <!-- Footer -->
- <footer>
+  <footer>
     <p>&copy; 2025 Kalani Hasanthika. All rights reserved.</p>
   </footer>
 
@@ -238,10 +240,8 @@
     // Toggle search input
     function toggleSearch() {
       const searchInput = document.querySelector(".search-input");
+      searchInput.style.display = (searchInput.style.display === "block") ? "none" : "block";
       if (searchInput.style.display === "block") {
-        searchInput.style.display = "none";
-      } else {
-        searchInput.style.display = "block";
         searchInput.focus();
       }
     }
@@ -251,41 +251,74 @@
       const query = document.querySelector(".search-input").value.toLowerCase();
       const articles = document.querySelectorAll(".article");
       articles.forEach(article => {
-        const text = article.innerText.toLowerCase();
-        article.style.display = text.includes(query) ? "block" : "none";
+        article.style.display = article.innerText.toLowerCase().includes(query) ? "block" : "none";
       });
     }
 
-    // Function to fetch and display articles for a given section
+    // Function to fetch and display articles from the given URL
     async function fetchArticles(apiUrl, containerId) {
       try {
         const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        // Sort articles by date (newest first)
-        data.articles.sort((a, b) => new Date(b.date) - new Date(a.date));
-
+        let contentText = await response.text();
+        let doc;
+        // If the URL is for blog1 (Markdown files), convert Markdown to HTML
+        if (apiUrl.includes("statistics-blog1")) {
+          const converter = new showdown.Converter();
+          const htmlContent = converter.makeHtml(contentText);
+          const parser = new DOMParser();
+          doc = parser.parseFromString(htmlContent, "text/html");
+        } else {
+          const parser = new DOMParser();
+          doc = parser.parseFromString(contentText, "text/html");
+        }
+        
+        // Try to select articles using a common selector. 
+        // The blog pages should ideally wrap each article in an element with class "post".
+        let articles = Array.from(doc.querySelectorAll('.post'));
+        
+        // Fallback: if no .post elements are found, assume articles start with <h2>
+        if (articles.length === 0) {
+          articles = Array.from(doc.querySelectorAll('h2')).map(h2 => {
+            const container = document.createElement("div");
+            container.classList.add("post");
+            container.appendChild(h2.cloneNode(true));
+            const next = h2.nextElementSibling;
+            if (next && next.tagName.toLowerCase() === 'p') {
+              container.appendChild(next.cloneNode(true));
+            }
+            // If the Markdown doesn't include a date, use current date
+            container.setAttribute('data-date', new Date().toISOString());
+            return container;
+          });
+        }
+        
+        // Sort articles by their data-date attribute (newest first)
+        articles.sort((a, b) => new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date')));
+        
         const container = document.getElementById(containerId);
-        container.innerHTML = ''; // Clear any previous content
-
-        data.articles.forEach((article, index) => {
+        container.innerHTML = "";
+        
+        // Display only the three most recent articles
+        articles.slice(0, 3).forEach(articleEl => {
           const articleDiv = document.createElement("div");
           articleDiv.classList.add("article");
-
-          const title = document.createElement("h3");
-          title.textContent = article.title;
-          articleDiv.appendChild(title);
-
-          const summary = document.createElement("p");
-          summary.textContent = article.summary;
-          articleDiv.appendChild(summary);
-
-          // Add a horizontal line after each article except the last one
-          if (index < data.articles.length - 1) {
-            const hr = document.createElement("hr");
-            articleDiv.appendChild(hr);
+          
+          // Try to extract a title from an h2 or h3 element and a summary from a <p>
+          const titleEl = articleEl.querySelector("h2, h3");
+          const summaryEl = articleEl.querySelector("p");
+          
+          if (titleEl) {
+            const title = document.createElement("h3");
+            title.textContent = titleEl.textContent;
+            articleDiv.appendChild(title);
           }
-
+          
+          if (summaryEl) {
+            const summary = document.createElement("p");
+            summary.textContent = summaryEl.textContent;
+            articleDiv.appendChild(summary);
+          }
+          
           container.appendChild(articleDiv);
         });
       } catch (error) {
@@ -295,7 +328,6 @@
 
     // Fetch articles for each section on page load
     window.addEventListener("DOMContentLoaded", () => {
-      // Replace these example URLs with your actual API or feed endpoints.
       fetchArticles("https://khasanthika.github.io/statistics-blog2/", "tech-articles");
       fetchArticles("https://khasanthika.github.io/statistics-blog1/", "entertainment-articles");
     });
