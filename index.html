@@ -325,11 +325,46 @@
         console.error("Error fetching articles from", apiUrl, error);
       }
     }
+async function fetchJekyllPosts(feedUrl, containerId) {
+    try {
+        const response = await fetch(feedUrl);
+        const text = await response.text();
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(text, "application/xml");
+
+        const items = Array.from(xml.querySelectorAll("item"));
+        
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+
+        // Display only the three most recent articles
+        items.slice(0, 3).forEach(item => {
+            const title = item.querySelector("title").textContent;
+            const link = item.querySelector("link").textContent;
+            
+            const articleDiv = document.createElement("div");
+            articleDiv.classList.add("article");
+
+            const titleEl = document.createElement("h3");
+            titleEl.textContent = title;
+            titleEl.onclick = () => window.open(link, "_blank");
+
+            articleDiv.appendChild(titleEl);
+            container.appendChild(articleDiv);
+        });
+    } catch (error) {
+        console.error("Error fetching Jekyll blog posts from", feedUrl, error);
+    }
+}
+
+// Fetch posts from Jekyll Minima blog
+window.addEventListener("DOMContentLoaded", () => {
+    fetchJekyllPosts("https://khasanthika.github.io/statistics-blog1/feed.xml", "entertainment-articles");
+});
 
     // Fetch articles for each section on page load
     window.addEventListener("DOMContentLoaded", () => {
       fetchArticles("https://khasanthika.github.io/statistics-blog2/", "tech-articles");
-      fetchArticles("https://khasanthika.github.io/statistics-blog1/", "entertainment-articles");
     });
   </script>
 </body>
