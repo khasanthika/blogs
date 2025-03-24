@@ -180,7 +180,6 @@
   <!-- Header -->
   <header>
     <div>
-      <h1>Kalani Hasanthika</h1>
       <nav>
         <ul>
           <li id="tab-home" class="active-tab" onclick="showTab('home')">Home</li>
@@ -201,10 +200,10 @@
       </div>
       <div class="social-links">
          <a href="https://github.com/yourusername" target="_blank"><i class="fab fa-github"></i></a>
-         <a href="https://www.linkedin.com/in/yourusername" target="_blank"><i class="fab fa-linkedin"></i></a>
-         <a href="mailto:kalanihasanthika@gmail.com" target="_blank"><i class="fas fa-envelope"></i></a>
-         <a href="https://twitter.com/yourusername" target="_blank"><i class="fab fa-twitter"></i></a>
-         <a href="https://scholar.google.com/citations?user=yourid" target="_blank"><i class="fas fa-graduation-cap"></i></a>
+      <a href="https://www.linkedin.com/in/yourusername" target="_blank"><i class="fab fa-linkedin"></i></a>
+      <a href="mailto:kalanihasanthika@gmail.com" target="_blank"><i class="fas fa-envelope"></i></a>
+      <a href="https://twitter.com/yourusername" target="_blank"><i class="fab fa-twitter"></i></a>
+        <a href="https://scholar.google.com/citations?user=yourid" target="_blank"><i class="fas fa-graduation-cap"></i></a>
       </div>
     </div>
   </header>
@@ -213,21 +212,10 @@
   <div class="main-content">
     <!-- Tech Column -->
     <div class="column">
-      <h2>Beyond the Basics: Statistics &amp; Applications</h2>
+      <h2>Beyond the Basics: Statistics & Applications</h2>
       <img src="images/tech.jpg" alt="Tech Section Image" class="section-image" />
-      <!-- Dynamically list articles from the "statistics-blog2" category -->
-      <div id="tech-articles">
-        {% assign tech_posts = site.categories.statistics_blog2 | sort: "date" | reverse %}
-        {% for post in tech_posts %}
-          <div class="article">
-            <h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
-            <p>{{ post.excerpt }}</p>
-            {% unless forloop.last %}
-              <hr>
-            {% endunless %}
-          </div>
-        {% endfor %}
-      </div>
+      <!-- Container for dynamic Tech articles -->
+      <div id="tech-articles"></div>
       <a href="#" class="more-link">More Tech</a>
     </div>
 
@@ -235,25 +223,14 @@
     <div class="column">
       <h2>Understanding Statistics</h2>
       <img src="images/entertainment.jpg" alt="Entertainment Section Image" class="section-image" />
-      <!-- Dynamically list articles from the "statistics-blog1" category -->
-      <div id="entertainment-articles">
-        {% assign ent_posts = site.categories.statistics_blog1 | sort: "date" | reverse %}
-        {% for post in ent_posts %}
-          <div class="article">
-            <h3><a href="https://khasanthika.github.io/statistics-blog1/">{{ post.title }}</a></h3>
-            <p>{{ post.excerpt }}</p>
-            {% unless forloop.last %}
-              <hr>
-            {% endunless %}
-          </div>
-        {% endfor %}
-      </div>
+      <!-- Container for dynamic Entertainment articles -->
+      <div id="entertainment-articles"></div>
       <a href="#" class="more-link">More Entertainment</a>
     </div>
   </div>
 
   <!-- Footer -->
-  <footer>
+ <footer>
     <p>&copy; 2025 Kalani Hasanthika. All rights reserved.</p>
   </footer>
 
@@ -278,6 +255,50 @@
         article.style.display = text.includes(query) ? "block" : "none";
       });
     }
+
+    // Function to fetch and display articles for a given section
+    async function fetchArticles(apiUrl, containerId) {
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        // Sort articles by date (newest first)
+        data.articles.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        const container = document.getElementById(containerId);
+        container.innerHTML = ''; // Clear any previous content
+
+        data.articles.forEach((article, index) => {
+          const articleDiv = document.createElement("div");
+          articleDiv.classList.add("article");
+
+          const title = document.createElement("h3");
+          title.textContent = article.title;
+          articleDiv.appendChild(title);
+
+          const summary = document.createElement("p");
+          summary.textContent = article.summary;
+          articleDiv.appendChild(summary);
+
+          // Add a horizontal line after each article except the last one
+          if (index < data.articles.length - 1) {
+            const hr = document.createElement("hr");
+            articleDiv.appendChild(hr);
+          }
+
+          container.appendChild(articleDiv);
+        });
+      } catch (error) {
+        console.error("Error fetching articles from", apiUrl, error);
+      }
+    }
+
+    // Fetch articles for each section on page load
+    window.addEventListener("DOMContentLoaded", () => {
+      // Replace these example URLs with your actual API or feed endpoints.
+      fetchArticles("https://khasanthika.github.io/statistics-blog2/", "tech-articles");
+      fetchArticles("https://khasanthika.github.io/statistics-blog1/", "entertainment-articles");
+    });
   </script>
 </body>
 </html>
