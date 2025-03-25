@@ -133,6 +133,14 @@
       color: #ffcc00;
       cursor: pointer;
     }
+     a {
+    text-decoration: none;
+  }
+  /* Optional: Remove underline on hover as well */
+  a:hover {
+    text-decoration: none;
+    color: #ffcc00;
+  }
     /* Customized horizontal line */
     hr {
       border: none;
@@ -185,8 +193,8 @@
       <nav>
         <ul>
           <li id="tab-home" class="active-tab" onclick="showTab('home')">Home</li>
-          <li>About</li>
-          <li>Contact</li>
+          <li><a href="https://khasanthika.github.io/statistics-blog1/" target="_blank">Beyond the Basics</a></li>
+          <li><a href="https://khasanthika.github.io/statistics-blog2/" target="_blank">Understanding Statistics</a></li>
         </ul>
       </nav>
     </div>
@@ -204,7 +212,6 @@
         <a href="https://github.com/yourusername" target="_blank"><i class="fab fa-github"></i></a>
         <a href="https://www.linkedin.com/in/yourusername" target="_blank"><i class="fab fa-linkedin"></i></a>
         <a href="mailto:kalanihasanthika@gmail.com" target="_blank"><i class="fas fa-envelope"></i></a>
-        <a href="https://twitter.com/yourusername" target="_blank"><i class="fab fa-twitter"></i></a>
         <a href="https://scholar.google.com/citations?user=yourid" target="_blank"><i class="fas fa-graduation-cap"></i></a>
       </div>
     </div>
@@ -218,7 +225,7 @@
       <img src="images/tech.jpg" alt="Tech Section Image" class="section-image" />
       <!-- Container for dynamic Tech articles -->
       <div id="tech-articles"></div>
-      <a href="#" class="more-link">More Tech</a>
+      <a href="https://khasanthika.github.io/statistics-blog1/" class="more-link">More Posts</a>
     </div>
 
     <!-- Entertainment Column -->
@@ -227,10 +234,14 @@
       <img src="images/entertainment.jpg" alt="Entertainment Section Image" class="section-image" />
       <!-- Container for dynamic Entertainment articles -->
       <div id="entertainment-articles"></div>
-      <a href="#" class="more-link">More Entertainment</a>
+      <a href="https://khasanthika.github.io/statistics-blog2/" class="more-link">More Posts</a>
     </div>
   </div>
 
+  <div class="main-content">
+    <a href="https://khasanthika.github.io/">&larr; Return to My Website</a>
+  </div>
+  
   <!-- Footer -->
   <footer>
     <p>&copy; 2025 Kalani Hasanthika. All rights reserved.</p>
